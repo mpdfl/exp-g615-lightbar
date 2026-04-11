@@ -22,6 +22,8 @@ This repository packages the ASUS Aura file overrides that made the front RGB li
 - [`reference/aura_support.ron.original`](reference/aura_support.ron.original): original system support table captured before the patch
 - [`reference/aura_19b6.ron.original`](reference/aura_19b6.ron.original): original Aura config captured before the patch
 - [`install.sh`](install.sh): installer that backs up the current files, installs the bundled versions, and restarts `asusd`
+- [`scripts/toggle-lightbar`](scripts/toggle-lightbar): user-level helper that toggles the lightbar power zone on and off
+- [`hypr/m5-lightbar-bind.conf`](hypr/m5-lightbar-bind.conf): Hyprland bind snippet for the ASUS `M5` key
 
 ## Install
 
@@ -61,6 +63,40 @@ Expected result:
 - `Matched to G615JPR` appears
 - `no entry for this model` does not appear
 - the front RGB strip lights up physically
+
+## M5 Toggle
+
+On this `G615JPR`, the ASUS `M5` key emits Linux `KEY_PROG1`, which Hyprland sees as `code:156`.
+
+The bundled helper toggles the lightbar power zone:
+
+```bash
+./scripts/toggle-lightbar
+```
+
+To install it for your user:
+
+```bash
+install -Dm755 ./scripts/toggle-lightbar ~/.local/bin/toggle-lightbar
+```
+
+To bind `M5` in Hyprland, add the line from [`hypr/m5-lightbar-bind.conf`](hypr/m5-lightbar-bind.conf) to your personal Hypr config, for example `~/.config/hypr/bindings.conf`:
+
+```ini
+bindrd = , code:156, Toggle lightbar, exec, ~/.local/bin/toggle-lightbar
+```
+
+Then reload Hyprland:
+
+```bash
+hyprctl reload
+```
+
+Notes:
+
+- `bindrd` triggers on key release, which avoids repeated toggles while the key is held
+- the helper stores its last known state in `~/.local/state/lightbar-state`
+- the helper tries `asusctl` first, then `sudo -n`, then `pkexec`
 
 ## Rollback
 

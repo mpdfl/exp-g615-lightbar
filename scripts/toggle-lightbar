@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}"
+state_file="$state_dir/lightbar-state"
+
+notify() {
+  if command -v notify-send >/dev/null 2>&1; then
+    notify-send "Lightbar" "$1"
+  fi
+}
+
+run_asusctl() {
+  if asusctl "$@" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if sudo -n true >/dev/null 2>&1 && sudo asusctl "$@" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if command -v pkexec >/dev/null 2>&1 && pkexec asusctl "$@" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  return 1
+}
+
+mkdir -p "$state_dir"
+
+current_state="on"
+if [[ -f "$state_file" ]]; then
+  current_state="$(cat "$state_file")"
+fi
+
+if [[ "$current_state" == "on" ]]; then
+  if run_asusctl aura power lightbar; then
+    printf 'off\n' >"$state_file"
+    notify "Off"
+    exit 0
+  fi
+else
+  if run_asusctl aura power lightbar --boot --awake --sleep --shutdown; then
+    printf 'on\n' >"$state_file"
+    notify "On"
+    exit 0
+  fi
+fi
+
+notify "Toggle failed"
+exit 1
