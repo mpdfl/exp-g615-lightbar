@@ -1,6 +1,6 @@
 # G615JPR ASUS Lightbar Fix
 
-This repository packages the ASUS Aura file overrides that made the front RGB lightbar work on a `G615JPR` laptop.
+This repository contains an AI experiment to get ASUS Aura file overrides that made the front RGB lightbar work on a `G615JPR` laptop.
 
 ## Tested On
 
